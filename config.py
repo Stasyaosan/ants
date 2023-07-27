@@ -1,0 +1,5 @@
+WIN_X = 1500
+WIN_Y = 800
+WIN_SIZE = (WIN_X, WIN_Y)
+SIZE_BLOCK = 50
+scale = 1
