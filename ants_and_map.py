@@ -101,6 +101,7 @@ class Ant(pygame.sprite.Sprite):
         self.radius_to_patrol = 5
         self.amount_of_blocks_to_patrol = 0
         self.direction_to_patrol = up
+        self.field_of_view = 2
 
     def draw_ant(self, column, row, win):
         win.blit(self.image, (column * self.map.size_block, row * self.map.size_block))
@@ -113,6 +114,9 @@ class Ant(pygame.sprite.Sprite):
             self.restricted_blocks.append([self.x, self.y])
         else:
             self.restricted_blocks.pop(0)
+
+    def check_for_food(self):
+        pass
 
     def to_patrol(self):
 
@@ -128,6 +132,7 @@ class Ant(pygame.sprite.Sprite):
                 and ((self.y_exit + self.radius_to_patrol) > self.y + self.direction_to_patrol[1] > (
                 self.y_exit - self.radius_to_patrol)):
             self.move(self.direction_to_patrol)
+            self.check_for_food()
         else:
             list_direction_to_patrol = [right, right_up, right_down,
                                         left, left_up, left_down, up, down]
