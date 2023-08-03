@@ -43,6 +43,7 @@ class Map(pygame.sprite.Sprite):
     GREEN = (63, 191, 76)
     GREEN_DARK = (90, 163, 85)
     BLACK = (0, 0, 0)
+    ORANGE = (155, 200, 0)
 
     def __init__(self, x, y):
         super().__init__()
@@ -63,8 +64,8 @@ class Map(pygame.sprite.Sprite):
         pygame.draw.rect(win, color, pygame.Rect(column * self.size_block,
                                                  row * self.size_block, self.size_block, self.size_block))
 
-    def draw_stone_test(self, pos):
-        self.matrix[pos[0] // SIZE_BLOCK][pos[1] // SIZE_BLOCK] = 'stone'
+    def draw_test(self, pos):
+        self.matrix[pos[0] // SIZE_BLOCK][pos[1] // SIZE_BLOCK] = 'food'
 
     def draw_matrix(self, win):
         for row in range(self.count_blok_y):
@@ -76,6 +77,9 @@ class Map(pygame.sprite.Sprite):
                 self.draw_blok(color, column, row, win)
                 if self.matrix[column][row] == 'stone':
                     color = Map.BLACK
+                    self.draw_blok(color, column, row, win)
+                if self.matrix[column][row] == 'food':
+                    color = Map.ORANGE
                     self.draw_blok(color, column, row, win)
 
     def update(self, win):
@@ -116,7 +120,10 @@ class Ant(pygame.sprite.Sprite):
             self.restricted_blocks.pop(0)
 
     def check_for_food(self):
-        pass
+        for x in range(-self.field_of_view, self.field_of_view + 1):
+            for y in range(-self.field_of_view, self.field_of_view + 1):
+                if self.map.matrix[self.x + x][self.y + y] == 'food':
+                    print('fooood!!!!!!!')
 
     def to_patrol(self):
 

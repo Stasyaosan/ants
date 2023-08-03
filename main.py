@@ -40,7 +40,7 @@ while True:
 
         if event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
-            map.draw_stone_test(pos)
+            map.draw_test(pos)
 
         if event.type == random_move:
             ant_test.to_patrol()
