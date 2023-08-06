@@ -30,7 +30,7 @@ def redraw():
 
 
 random_move = pygame.USEREVENT
-pygame.time.set_timer(random_move, 100)
+pygame.time.set_timer(random_move, 1000)
 
 while True:
     clock.tick(25)

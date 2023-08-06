@@ -106,6 +106,7 @@ class Ant(pygame.sprite.Sprite):
         self.amount_of_blocks_to_patrol = 0
         self.direction_to_patrol = up
         self.field_of_view = 2
+        self.saved_way = [[x_exit, y_exit]]
 
     def draw_ant(self, column, row, win):
         win.blit(self.image, (column * self.map.size_block, row * self.map.size_block))
@@ -119,14 +120,14 @@ class Ant(pygame.sprite.Sprite):
         else:
             self.restricted_blocks.pop(0)
 
-    def check_for_food(self):
+    def is_food_found(self):
         for x in range(-self.field_of_view, self.field_of_view + 1):
             for y in range(-self.field_of_view, self.field_of_view + 1):
                 if self.map.matrix[self.x + x][self.y + y] == 'food':
-                    print('fooood!!!!!!!')
+                    return True
+        return False
 
     def to_patrol(self):
-
         if self.amount_of_blocks_to_patrol == 0:
             temp_direction_to_patrol = right
             if not (temp_direction_to_patrol[0] == self.direction_to_patrol[0] * -1 and temp_direction_to_patrol[1] ==
@@ -139,7 +140,8 @@ class Ant(pygame.sprite.Sprite):
                 and ((self.y_exit + self.radius_to_patrol) > self.y + self.direction_to_patrol[1] > (
                 self.y_exit - self.radius_to_patrol)):
             self.move(self.direction_to_patrol)
-            self.check_for_food()
+            self.saved_way.append([self.x, self.y])
+            self.is_food_found()
         else:
             list_direction_to_patrol = [right, right_up, right_down,
                                         left, left_up, left_down, up, down]
