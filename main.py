@@ -30,7 +30,7 @@ def redraw():
 
 
 random_move = pygame.USEREVENT
-pygame.time.set_timer(random_move, 1000)
+pygame.time.set_timer(random_move, 100)
 
 while True:
     clock.tick(25)
@@ -43,7 +43,7 @@ while True:
             map.draw_test(pos)
 
         if event.type == random_move:
-            ant_test.to_patrol()
+            ant_test.find_food()
 
         if event.type == pygame.MOUSEWHEEL:
             scale += event.y

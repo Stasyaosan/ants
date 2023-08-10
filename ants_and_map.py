@@ -120,12 +120,18 @@ class Ant(pygame.sprite.Sprite):
         else:
             self.restricted_blocks.pop(0)
 
-    def is_food_found(self):
+    def find_food(self):
+        if not self.find_food_coordinate() is None:
+            self.find_destination(self.find_food_coordinate())
+        else:
+            self.to_patrol()
+
+    def find_food_coordinate(self):
         for x in range(-self.field_of_view, self.field_of_view + 1):
             for y in range(-self.field_of_view, self.field_of_view + 1):
                 if self.map.matrix[self.x + x][self.y + y] == 'food':
-                    return True
-        return False
+                    return [self.x + x, self.y + y]
+        return None
 
     def to_patrol(self):
         if self.amount_of_blocks_to_patrol == 0:
@@ -141,7 +147,6 @@ class Ant(pygame.sprite.Sprite):
                 self.y_exit - self.radius_to_patrol)):
             self.move(self.direction_to_patrol)
             self.saved_way.append([self.x, self.y])
-            self.is_food_found()
         else:
             list_direction_to_patrol = [right, right_up, right_down,
                                         left, left_up, left_down, up, down]
@@ -165,7 +170,6 @@ class Ant(pygame.sprite.Sprite):
         self.amount_of_blocks_to_patrol -= 1
 
     def find_home(self):
-        # distance_to_home = self.find_distance_to_home([self.x, self.y])
         distances = {}
         directions = {}
         to_left = [self.x - 1, self.y]
@@ -210,6 +214,72 @@ class Ant(pygame.sprite.Sprite):
         print(self.restricted_blocks)
 
         if self.map.matrix[self.x][self.y].find('exit') != -1:
+            pass
+        elif min_distance == 'to_left':
+            self.move(left)
+        elif min_distance == 'to_left_up':
+            self.move(left_up)
+        elif min_distance == 'to_left_down':
+            self.move(left_down)
+        elif min_distance == 'to_right_up':
+            self.move(right_up)
+        elif min_distance == 'to_right':
+            self.move(right)
+        elif min_distance == 'to_right_down':
+            self.move(right_down)
+        elif min_distance == 'to_up':
+            self.move(up)
+        elif min_distance == 'to_down':
+            self.move(down)
+
+    def find_distance_to_destination(self, coordinate, destination):
+        return math.sqrt((coordinate[0] - destination[0]) ** 2 + (coordinate[1] - destination[1]) ** 2)
+
+    def find_destination(self, destination):
+        distances = {}
+        directions = {}
+        to_left = [self.x - 1, self.y]
+        to_right = [self.x + 1, self.y]
+        to_up = [self.x, self.y - 1]
+        to_down = [self.x, self.y + 1]
+        to_left_up = [self.x - 1, self.y - 1]
+        to_left_down = [self.x - 1, self.y + 1]
+        to_right_up = [self.x + 1, self.y - 1]
+        to_right_down = [self.x + 1, self.y + 1]
+        if to_left not in self.restricted_blocks:
+            directions.update({'to_left': to_left})
+        if to_left_up not in self.restricted_blocks:
+            directions.update({'to_left_up': to_left_up})
+        if to_left_down not in self.restricted_blocks:
+            directions.update({'to_left_down': to_left_down})
+        if to_right not in self.restricted_blocks:
+            directions.update({'to_right': to_right})
+        if to_right_up not in self.restricted_blocks:
+            directions.update({'to_right_up': to_right_up})
+        if to_right_down not in self.restricted_blocks:
+            directions.update({'to_right_down': to_right_down})
+        if to_up not in self.restricted_blocks:
+            directions.update({'to_up': to_up})
+        if to_down not in self.restricted_blocks:
+            directions.update({'to_down': to_down})
+
+        for direction in directions:
+            if self.map.matrix[directions[direction][0]][directions[direction][1]] in self.barriers:
+                direction = None
+            else:
+                distance = self.find_distance_to_destination(directions[direction], destination)
+                distances.update({direction: distance})
+
+        try:
+            min_distance = min(distances, key=distances.get)
+        except ValueError:
+            self.restricted_blocks.clear()
+            min_distance = ''
+
+        self.save_to_restricted_blocks()
+        print(self.restricted_blocks)
+
+        if [self.x, self.y] == destination:
             pass
         elif min_distance == 'to_left':
             self.move(left)
