@@ -107,6 +107,8 @@ class Ant(pygame.sprite.Sprite):
         self.direction_to_patrol = up
         self.field_of_view = 2
         self.saved_way = [[x_exit, y_exit]]
+        self.amount_of_food = 0
+        self.current_destination = None
 
     def draw_ant(self, column, row, win):
         win.blit(self.image, (column * self.map.size_block, row * self.map.size_block))
@@ -120,16 +122,34 @@ class Ant(pygame.sprite.Sprite):
         else:
             self.restricted_blocks.pop(0)
 
+    def pick_up_food(self):
+        self.amount_of_food += 1
+        lis = self.map.matrix[self.x][self.y].split()
+        # print(lis)
+        lis.remove('food')
+        self.map.matrix[self.x][self.y] = ' '.join(lis)
+
     def find_food(self):
-        if not self.find_food_coordinate() is None:
-            self.find_destination(self.find_food_coordinate())
+        print(self.find_food_coordinate(), '\t', self.x, self.y)
+        if [self.x, self.y] != self.find_food_coordinate():
+            if self.current_destination is None:
+                if not self.find_food_coordinate() is None:
+                    self.current_destination = self.find_food_coordinate()
+                else:
+                    self.to_patrol()
+            else:
+                self.find_destination(self.current_destination)
         else:
-            self.to_patrol()
+            self.pick_up_food()
+            self.current_destination = [self.x_exit, self.y_exit]
+
+        if [self.x, self.y] == [self.x_exit, self.y_exit]:
+            self.current_destination = None
 
     def find_food_coordinate(self):
         for x in range(-self.field_of_view, self.field_of_view + 1):
             for y in range(-self.field_of_view, self.field_of_view + 1):
-                if self.map.matrix[self.x + x][self.y + y] == 'food':
+                if self.map.matrix[self.x + x][self.y + y].find('food') != -1:
                     return [self.x + x, self.y + y]
         return None
 
@@ -211,7 +231,6 @@ class Ant(pygame.sprite.Sprite):
             min_distance = ''
 
         self.save_to_restricted_blocks()
-        print(self.restricted_blocks)
 
         if self.map.matrix[self.x][self.y].find('exit') != -1:
             pass
@@ -277,7 +296,6 @@ class Ant(pygame.sprite.Sprite):
             min_distance = ''
 
         self.save_to_restricted_blocks()
-        print(self.restricted_blocks)
 
         if [self.x, self.y] == destination:
             pass
