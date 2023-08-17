@@ -109,6 +109,8 @@ class Ant(pygame.sprite.Sprite):
         self.saved_way = [[x_exit, y_exit]]
         self.amount_of_food = 0
         self.current_destination = None
+        self.food_coordinate = None
+        self.max_amount_of_food = 2
 
     def draw_ant(self, column, row, win):
         win.blit(self.image, (column * self.map.size_block, row * self.map.size_block))
@@ -130,27 +132,36 @@ class Ant(pygame.sprite.Sprite):
         self.map.matrix[self.x][self.y] = ' '.join(lis)
 
     def find_food(self):
-        print(self.find_food_coordinate(), '\t', self.x, self.y)
-        if [self.x, self.y] != self.find_food_coordinate():
-            if self.current_destination is None:
-                if not self.find_food_coordinate() is None:
-                    self.current_destination = self.find_food_coordinate()
+        print(self.find_food_coordinate(), '\t', self.x, self.y, '\t', self.current_destination)
+        if self.amount_of_food < self.max_amount_of_food:
+            if [self.x, self.y] != self.food_coordinate:
+                if self.current_destination is None:
+                    if not self.find_food_coordinate() is None:
+                        self.current_destination = self.find_food_coordinate()
+                        self.food_coordinate = self.find_food_coordinate()
+                    else:
+                        self.to_patrol()
                 else:
-                    self.to_patrol()
+                    self.find_destination(self.current_destination)
             else:
-                self.find_destination(self.current_destination)
-        else:
-            self.pick_up_food()
-            self.current_destination = [self.x_exit, self.y_exit]
+                self.pick_up_food()
+                self.food_coordinate = None
+                self.current_destination = None
 
-        if [self.x, self.y] == [self.x_exit, self.y_exit]:
-            self.current_destination = None
+        else:
+            self.current_destination = [self.x_exit, self.y_exit]
+            if [self.x, self.y] == [self.x_exit, self.y_exit]:
+                self.current_destination = None
+                self.amount_of_food = 0
 
     def find_food_coordinate(self):
         for x in range(-self.field_of_view, self.field_of_view + 1):
             for y in range(-self.field_of_view, self.field_of_view + 1):
-                if self.map.matrix[self.x + x][self.y + y].find('food') != -1:
-                    return [self.x + x, self.y + y]
+                try:
+                    if self.map.matrix[self.x + x][self.y + y].find('food') != -1:
+                        return [self.x + x, self.y + y]
+                except IndexError:
+                    pass
         return None
 
     def to_patrol(self):
