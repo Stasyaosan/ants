@@ -27,6 +27,7 @@ class Home(pygame.sprite.Sprite):
         self.y_exit = self.y + self.height_block // 2
         self.to_place(self.width_block, self.height_block)
         self.map.matrix[self.x_exit][self.y_exit] = 'exit'
+        self.amount_of_food = 0
 
     def update(self):
         self.rect.topleft = [self.x * self.map.size_block, self.y *
@@ -87,12 +88,13 @@ class Map(pygame.sprite.Sprite):
 
 
 class Ant(pygame.sprite.Sprite):
-    def __init__(self, x, y, map, x_exit, y_exit):
+    def __init__(self, x, y, map, home):
         super().__init__()
         self.x = x
         self.y = y
-        self.x_exit = x_exit
-        self.y_exit = y_exit
+        self.x_exit = home.x_exit
+        self.y_exit = home.y_exit
+        self.home = home
         self.speed = 1
         self.run = True
         self.image = ant_im
@@ -106,7 +108,7 @@ class Ant(pygame.sprite.Sprite):
         self.amount_of_blocks_to_patrol = 0
         self.direction_to_patrol = up
         self.field_of_view = 2
-        self.saved_way = [[x_exit, y_exit]]
+        self.saved_way = [[self.x_exit, self.y_exit]]
         self.amount_of_food = 0
         self.current_destination = None
         self.food_coordinate = None
@@ -131,28 +133,49 @@ class Ant(pygame.sprite.Sprite):
         lis.remove('food')
         self.map.matrix[self.x][self.y] = ' '.join(lis)
 
-    def find_food(self):
-        print(self.find_food_coordinate(), '\t', self.x, self.y, '\t', self.current_destination)
-        if self.amount_of_food < self.max_amount_of_food:
-            if [self.x, self.y] != self.food_coordinate:
-                if self.current_destination is None:
-                    if not self.find_food_coordinate() is None:
-                        self.current_destination = self.find_food_coordinate()
-                        self.food_coordinate = self.find_food_coordinate()
-                    else:
-                        self.to_patrol()
-                else:
-                    self.find_destination(self.current_destination)
-            else:
-                self.pick_up_food()
-                self.food_coordinate = None
-                self.current_destination = None
+    def walk_saved_way(self):
+        pass
 
+    def find_food(self):
+        #
+        #
+        #
+        #
+        #                 self.food_coordinate = self.find_food_coordinate()
+        #             else:
+        #                 self.to_patrol()
+        #         else:
+        #             self.find_destination(self.current_destination)
+        #     else:
+        #
+        #         self.food_coordinate = None
+        #         self.current_destination = None
+        #
+        # else:
+        #     self.current_destination = [self.x_exit, self.y_exit]
+        #
+        #
+        if self.current_destination is None:
+            if not self.find_food_coordinate() is None:
+                self.current_destination = self.find_food_coordinate()
+            else:
+                self.to_patrol()
         else:
-            self.current_destination = [self.x_exit, self.y_exit]
-            if [self.x, self.y] == [self.x_exit, self.y_exit]:
-                self.current_destination = None
-                self.amount_of_food = 0
+            if self.amount_of_food < self.max_amount_of_food:
+                self.find_destination(self.current_destination)
+                if self.map.matrix[self.x][self.y].find('food') != -1:
+                    self.pick_up_food()
+                    self.current_destination = None
+            else:
+                self.current_destination = [self.x_exit, self.y_exit]
+                self.find_destination(self.current_destination)
+                if [self.x, self.y] == [self.x_exit, self.y_exit]:
+                    self.current_destination = None
+                    self.home.amount_of_food += self.amount_of_food
+                    self.amount_of_food = 0
+
+        self.saved_way.insert(0, [self.x, self.y])
+        print(self.saved_way)
 
     def find_food_coordinate(self):
         for x in range(-self.field_of_view, self.field_of_view + 1):
