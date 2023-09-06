@@ -113,6 +113,7 @@ class Ant(pygame.sprite.Sprite):
         self.current_destination = None
         self.food_coordinate = None
         self.max_amount_of_food = 2
+        self.is_walking_saved_way = False
 
     def draw_ant(self, column, row, win):
         win.blit(self.image, (column * self.map.size_block, row * self.map.size_block))
@@ -134,27 +135,10 @@ class Ant(pygame.sprite.Sprite):
         self.map.matrix[self.x][self.y] = ' '.join(lis)
 
     def walk_saved_way(self):
-        pass
+        [self.x, self.y] = self.saved_way[-1]
+        self.saved_way.pop()
 
     def find_food(self):
-        #
-        #
-        #
-        #
-        #                 self.food_coordinate = self.find_food_coordinate()
-        #             else:
-        #                 self.to_patrol()
-        #         else:
-        #             self.find_destination(self.current_destination)
-        #     else:
-        #
-        #         self.food_coordinate = None
-        #         self.current_destination = None
-        #
-        # else:
-        #     self.current_destination = [self.x_exit, self.y_exit]
-        #
-        #
         if self.current_destination is None:
             if not self.find_food_coordinate() is None:
                 self.current_destination = self.find_food_coordinate()
@@ -167,15 +151,18 @@ class Ant(pygame.sprite.Sprite):
                     self.pick_up_food()
                     self.current_destination = None
             else:
+                self.is_walking_saved_way = True
                 self.current_destination = [self.x_exit, self.y_exit]
-                self.find_destination(self.current_destination)
+                self.walk_saved_way()
                 if [self.x, self.y] == [self.x_exit, self.y_exit]:
                     self.current_destination = None
                     self.home.amount_of_food += self.amount_of_food
                     self.amount_of_food = 0
 
-        self.saved_way.insert(0, [self.x, self.y])
-        print(self.saved_way)
+        if not self.is_walking_saved_way:
+            if not [self.x, self.y] in self.saved_way:
+                self.saved_way.append([self.x, self.y])
+            print(self.saved_way)
 
     def find_food_coordinate(self):
         for x in range(-self.field_of_view, self.field_of_view + 1):
