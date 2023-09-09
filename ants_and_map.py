@@ -135,7 +135,7 @@ class Ant(pygame.sprite.Sprite):
         self.map.matrix[self.x][self.y] = ' '.join(lis)
 
     def walk_saved_way(self):
-        [self.x, self.y] = self.saved_way[-1]
+        self.move(self.saved_way[-1], True)
         self.saved_way.pop()
 
     def find_food(self):
@@ -158,6 +158,7 @@ class Ant(pygame.sprite.Sprite):
                     self.current_destination = None
                     self.home.amount_of_food += self.amount_of_food
                     self.amount_of_food = 0
+                    self.is_walking_saved_way = False
 
         if not self.is_walking_saved_way:
             if not [self.x, self.y] in self.saved_way:
@@ -182,6 +183,7 @@ class Ant(pygame.sprite.Sprite):
                 self.direction_to_patrol = temp_direction_to_patrol.copy()
 
             self.amount_of_blocks_to_patrol = random.randint(3, 7)
+
         if ((self.x_exit + self.radius_to_patrol) > self.x + self.direction_to_patrol[0] > (
                 self.x_exit - self.radius_to_patrol)) \
                 and ((self.y_exit + self.radius_to_patrol) > self.y + self.direction_to_patrol[1] > (
@@ -337,32 +339,67 @@ class Ant(pygame.sprite.Sprite):
         elif min_distance == 'to_down':
             self.move(down)
 
-    def move(self, direction):
+    def move(self, value, is_coodinate=False):
+        """
+        Перемещает объект в заданом направленнии
+        или в заданые координаты
+
+        :param value: может быть направлением или координатой (должен содержать два числа)
+        :type value: list of int
+        :param is_coodinate: показывает является ли value координатой или направлением
+        :type is_coodinate: bool
+        :return:
+        """
+
         self.run = True
+        if not is_coodinate:
+            if value[0] == 1 and self.x >= self.map.count_blok_x - 2:
+                self.run = False
 
-        if direction[0] == 1 and self.x >= self.map.count_blok_x - 2:
-            self.run = False
+            if value[0] == -1 and self.x <= 0:
+                self.run = False
 
-        if direction[0] == -1 and self.x <= 0:
-            self.run = False
+            if value[1] == -1 and self.y <= 0:
+                self.run = False
 
-        if direction[1] == -1 and self.y <= 0:
-            self.run = False
+            if value[1] == 1 and self.y >= self.map.count_blok_y - 2:
+                self.run = False
 
-        if direction[1] == 1 and self.y >= self.map.count_blok_y - 2:
-            self.run = False
+            if self.map.matrix[self.x + value[0]][self.y + value[1]] in self.barriers:
+                self.run = False
+            elif self.run:
+                self.map.matrix[self.x + value[0]][self.y + value[1]] += ' ant'
+                lis = self.map.matrix[self.x][self.y].split()
+                lis.remove('ant')
+                self.map.matrix[self.x][self.y] = ' '.join(lis)
 
-        if self.map.matrix[self.x + direction[0]][self.y + direction[1]] in self.barriers:
-            self.run = False
-        elif self.run:
-            self.map.matrix[self.x + direction[0]][self.y + direction[1]] += ' ant'
-            lis = self.map.matrix[self.x][self.y].split()
-            lis.remove('ant')
-            self.map.matrix[self.x][self.y] = ' '.join(lis)
+            if self.run:
+                self.x += value[0] * self.speed
+                self.y += value[1] * self.speed
+        else:
+            if value[0] >= self.map.count_blok_x:
+                self.run = False
 
-        if self.run:
-            self.x += direction[0] * self.speed
-            self.y += direction[1] * self.speed
+            if value[0] <= 0:
+                self.run = False
+
+            if value[1] <= 0:
+                self.run = False
+
+            if value[1] >= self.map.count_blok_y:
+                self.run = False
+
+            if self.map.matrix[value[0]][value[1]] in self.barriers:
+                self.run = False
+            elif self.run:
+                self.map.matrix[value[0]][value[1]] += ' ant'
+                lis = self.map.matrix[self.x][self.y].split()
+                lis.remove('ant')
+                self.map.matrix[self.x][self.y] = ' '.join(lis)
+
+            if self.run:
+                self.x = value[0]
+                self.y = value[1]
 
     def update(self, win):
         table = PrettyTable()

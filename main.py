@@ -10,11 +10,10 @@ win = pygame.display.set_mode(WIN_SIZE)
 map = Map(0, 0)
 home = Home(map.count_blok_y // 2, map.count_blok_y // 2 - 2, map)
 ant_test = Ant(home.x_exit, home.y_exit, map, home)
+ant_test_2 = Ant(home.x_exit, home.y_exit, map, home)
 ant = Ant(0, 0, map, home)
-moving_sprites = pygame.sprite.Group()
+moving_sprites = pygame.sprite.Group(ant_test, ant, ant_test_2)
 homes = pygame.sprite.Group()
-moving_sprites.add(ant_test)
-moving_sprites.add(ant)
 homes.add(home)
 # moving_sprites.add(map)
 clock = pygame.time.Clock()
@@ -44,6 +43,7 @@ while True:
 
         if event.type == random_move:
             ant_test.find_food()
+            ant_test_2.find_food()
             # print(home.amount_of_food)
 
         if event.type == pygame.MOUSEWHEEL:
